@@ -50,8 +50,8 @@ class MyRecorder:
         #create a recorder
         self.mRecorder = self.MediaRecorder()
         self.mRecorder.setAudioSource(self.AudioSource.MIC)
-        self.mRecorder.setOutputFormat(self.OutputFormat.THREE_GPP)
-        self.mRecorder.setOutputFile('/sdcard/robin_listen.3gp')
+        self.mRecorder.setOutputFormat(self.OutputFormat.)
+        self.mRecorder.setOutputFile('/sdcard/kivy/robin/rb.wav')
         self.mRecorder.setAudioEncoder(self.AudioEncoder.AMR_NB)
         self.mRecorder.prepare()
 
