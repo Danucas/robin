@@ -34,4 +34,6 @@ press the "open file" button and look at the terminal
 >
 >claping.wav
 >
->Choose a file: cat_2  *type the file name excluding the .wav extension*
+>Choose a file: schedule
+
+type the file name excluding the .wav extension

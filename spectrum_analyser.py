@@ -7,69 +7,178 @@ python espectrum analizer
 import tkinter as tk
 import os, time
 from sound_reader import AudioFile
+import sounddevice as sd
 
+class Track:
+    instance = 0
+    def __init__(self, root, filename=None):
+        Track.instance += 1
+        if filename == None:
+            filename = "Track-" + str(Track.instance)
+        self.filename = filename
+        self.nid = Track.instance - 1
+        self.zone = None
+        root.root.geometry("1280x{}".format(150 * Track.instance))
+        #track 1 canvas
+        self.canvas = tk.Canvas(root.root,
+                                   width=(root.root.winfo_screenwidth()),
+                                   height=(150),
+                                   bg="black", bd=0, relief="ridge",
+                                  highlightthickness=0)
+        self.canvas.place(x=0, y=(self.nid * 150))
+        #open file track1
+        self.sel_file = tk.Canvas(self.canvas,
+                                  width=(90),
+                                  height=(30),
+                                  bg="black", cursor="hand2",
+                                  bd=0, relief="ridge",
+                                  highlightthickness=0)
+        root.round_rectangle(3, 3, 87, 27,
+                             self.sel_file,
+                             radius=20, fill="blue")
+        self.sel_file.create_text(70, 15,
+                                  text='Open file',
+                                  anchor='e', fill="white")
+
+        self.sel_file.bind("<Button-1>", lambda e: root.open_file(e, self.nid))
+        self.sel_file.place(x=0, y=120)
+
+        #play button
+        self.play_b = tk.Canvas(self.canvas,
+                                width=(45),
+                                height=(30),
+                                bg="black", cursor="hand2",
+                                bd=0, relief="ridge",
+                                highlightthickness=0)
+        root.round_rectangle(3, 3, 27, 27,
+                             self.play_b,
+                             radius=20, fill="#32a852")
+        self.play_b.create_text(20, 15,
+                                  text='>',
+                                  anchor='e', fill="white")
+        root.round_rectangle(3, 3, 27, 27,
+                             self.play_b,
+                             radius=20, fill="#32a852")
+        self.play_b.bind("<Button-1>", lambda e: root.play_file(e, self.nid))
+        self.play_b.create_text(20, 15,
+                                  text='>',
+                                  anchor='e', fill="white")
+        self.play_b.place(x=90, y=120)
+        self.canvas.bind("<Button-1>",
+                            lambda e: root.selectZoneStart(e, self.nid))
+        self.canvas.bind("<Motion>",
+                            lambda e: root.selectZoneEnd(e, True, self.nid))
+        self.canvas.bind("<ButtonRelease-1>",
+                            lambda e: root.selectZoneEnd(e, False, self.nid))
+
+class Sample:
+    def __init__(self, root, data, nid):
+        self.data = data
+        self.nid = nid
+        self.window = tk.Toplevel(root.root)
+        self.window.geometry("800x150+0+230")
+        self.window.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.window.title("Sample from track {}".format(nid + 1))
+        self.canvas = tk.Canvas(self.window, width=800,
+                                height=150, bg="black",
+                                bd=0, relief="ridge",
+                                highlightthickness=0)
+        self.play = tk.Canvas(self.canvas, width=30, height=30,
+                              cursor="hand2",
+                              bg="black",bd=0, relief="ridge",
+                              highlightthickness=0)
+        root.round_rectangle(3, 3, 27, 27,
+                             self.play,
+                             radius=20, fill="#32a852")
+        self.play.create_text(20, 15,
+                              text='>',
+                              anchor='e', fill="white")
+        self.play.bind("<Button-1>", lambda e: self.play_sound(e))
+        self.play.place(x=0, y=120)
+
+        self.canvas.pack()
+        self.draw_sample()
+
+    def on_close(self):
+        print("deleting", self.nid, "sample")
+        self.window.destroy()
+        del self
+
+    def play_sound(self, evn):
+        line = [None]
+        line[0] = self.canvas.create_line(2, 1, 2, 120,
+                                          fill="#3debe5",
+                                          width=2)
+        def draw_time_lapse():
+            init = 0
+            end = int(len(self.data))
+            width = 800
+            pos = 0
+            lapse = 16
+            chunk = int(len(self.data) / width) * lapse
+            t_s = float(chunk / 44100) * 1
+            print("chunk", chunk, "t_s", t_s)
+            sd.play(self.data[init:end], 44100, blocking=False)
+            while pos < width:
+                end = init + chunk
+                self.canvas.move(line[0], lapse, 0)
+                self.canvas.update()
+                #sd.stop()
+                time.sleep(t_s)
+                pos += lapse
+                init += chunk
+            sd.stop()
+        draw_time_lapse()
+
+
+        sd.play(self.data, 44100, )
+
+    def draw_sample(self):
+        width = len(self.data)
+        col = "#4287f5"
+        chunk = width
+        steps = chunk / 800
+        beak = 20
+        x = 1
+        pos = 0
+        last = 60
+        self.canvas.delete("all")
+        while pos < chunk:
+            y = float(self.data[pos]) + 0.5
+            y = 120 - int((120 * y) / 1)
+            self.canvas.create_line(x - 1, last, x, y, fill=col)
+            last = y
+            x += 1
+            pos += int(steps)
 
 
 
 class Window:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.geometry("1280x300")
+        self.root.geometry("1280x150")
         self.root.configure(background="black")
         self.root.title("RObin Spectrum ANalyzer - ROSAN")
+        menubar = tk.Menu(self.root, bg="black", foreground='white')
+        menubar.add_command(label="Add Track", command=lambda: self.add_track())
+        self.root.config(menu=menubar)
         self.canvas = [None, None]
         self.zones = [None]
         self.selecting = False
         self.au_d = [None, None]
-        #track 1 canvas
-        self.canvas[0] = tk.Canvas(self.root,
-                                   width=(self.root.winfo_screenwidth()),
-                                   height=(self.root.winfo_screenheight() - 30),
-                                   bg="black")
-        self.canvas[0].place(x=0, y=0)
-        self.sel_file = tk.Canvas(self.root,
-                                  width=(30),
-                                  height=(30),
-                                  bg="gray")
-        #open file track1
-        self.sel_file.bind("<Button-1>", lambda e: self.open_file(e, 0))
-        self.play_b = tk.Canvas(self.root,
-                                width=(30),
-                                height=(30),
-                                bg="green")
-        self.play_b.bind("<Button-1>", lambda e: self.play_file(e, 0))
-        self.sel_file.place(x=0, y=120)
-        self.play_b.place(x=30, y=120)
-        self.canvas[0].bind("<Button-1>", lambda e: self.selectZoneStart(e))
-        self.canvas[0].bind("<Motion>", lambda e: self.selectZoneEnd(e, True))
-        self.canvas[0].bind("<ButtonRelease-1>",
-                            lambda e: self.selectZoneEnd(e, False))
+        self.tracks = [None]
+        self.tracks[0] = Track(self)
+        #self.tracks.append(Track(self))
+        #self.tracks.append(Track(self))
 
-        #Track 2 canvas
-        self.canvas[1] = tk.Canvas(self.root,
-                                   width=(self.root.winfo_screenwidth()),
-                                   height=(self.root.winfo_screenheight() - 30),
-                                   bg="black")
-        self.canvas[1].place(x=0, y=150)
-        #open file track2
-        self.sel_file_2 = tk.Canvas(self.root,
-                                    width=(30),
-                                    height=(30),
-                                    bg="gray")
-        self.sel_file_2.bind("<Button-1>", lambda e: self.open_file(e, 1))
-        self.play_b_2 = tk.Canvas(self.root,
-                                  width=(30),
-                                  height=(30),
-                                  bg="green")
-        self.play_b_2.bind("<Button-1>", lambda e: self.play_file(e, 1))
-        self.sel_file_2.place(x=0, y=270)
-        self.play_b_2.place(x=30, y=270)
+    def add_track(self):
+        self.tracks.append(Track(self))
 
-    def selectZoneStart(self, ev):
-        if self.zones[0] != None:
-            self.canvas[0].delete(self.zones[0])
+    def selectZoneStart(self, ev, nid):
+        if self.tracks[nid].zone != None:
+            self.tracks[nid].canvas.delete(self.tracks[nid].zone)
         print(ev, ev.x, ev.y)
-        self.zones[0] = self.canvas[0].create_rectangle(ev.x, 1,
+        self.tracks[nid].zone = self.tracks[nid].canvas.create_rectangle(ev.x, 1,
                                                         ev.x, 120,
                                                         fill="#2453a3",
                                                         stipple="gray12")
@@ -78,27 +187,31 @@ class Window:
 
 
 
-    def selectZoneEnd(self, ev, state):
+    def selectZoneEnd(self, ev, state, nid):
         if state == True and self.selecting == True:
-            last = self.canvas[0].coords(self.zones[0])
+            last = self.tracks[nid].canvas.coords(self.tracks[nid].zone)
             x = last[0]
-            self.canvas[0].coords(self.zones[0], x, 1, ev.x, 120)
+            self.tracks[nid].canvas.coords(self.tracks[nid].zone, x, 1, ev.x, 120)
         elif self.selecting == True:
             self.selecting = False
-            x = self.canvas[0].coords(self.zones[0])[0]
-            width = len(self.au_d[0].data)
+            x = self.tracks[nid].canvas.coords(self.tracks[nid].zone)[0]
+            width = len(self.au_d[nid].data)
             x1 = int((width * x) / 1280)
             x2 = int((width * ev.x) / 1280)
-            self.au_d[1] = AudioFile("samps/sample.wav")
-            self.au_d[1].data = self.au_d[0].data[x1:x2]
-            self.draw_spectrum(self.au_d[1].data, 1)
+            self.sample = AudioFile("samps/sample.wav")
+            self.sample.data = self.au_d[nid].data[x1:x2]
+            self.set_sample(self.sample.data, nid)
+            #self.draw_spectrum(self.sample.data, nid)
             print(x, ev.x)
         pass
+
+    def set_sample(self, data, nid):
+        self.sample = Sample(self, data, nid)
 
     def play_file(self, event, c):
 
         if self.au_d[c] != None:
-            self.au_d[c].canvas = self.canvas[c]
+            self.au_d[c].canvas = self.tracks[c].canvas
             self.au_d[c].play()
 
     def open_file(self, event, c):
@@ -115,6 +228,8 @@ class Window:
         inp = input("\033[0m\nChoose a file: ")
 
         if inp+".wav" in files:
+            if c >= len(self.au_d):
+                self.au_d.append(None)
             self.au_d[c] = AudioFile(inp)
             data = self.au_d[c].read_file(inp)
             self.draw_spectrum(data, c)
@@ -131,14 +246,39 @@ class Window:
         beak = 20
         x = 1
         pos = 0
-        last = 0
-        self.canvas[c].delete("all")
+        last = 60
+        self.tracks[c].canvas.delete("all")
         while pos < chunk and pos + ini < end:
             y = float(sound[pos + ini]) + 0.5
             y = 120 - int((120 * y) / 1)
-            self.canvas[c].create_line(x - 1, last, x, y, fill=col)
+            self.tracks[c].canvas.create_line(x - 1, last, x, y, fill=col)
             last = y
             x += 1
             pos += int(steps)
 
         return ini, ini + chunk
+
+    def round_rectangle(self, x1, y1, x2, y2, s, radius=25, **kwargs):
+
+        points = [x1+radius, y1,
+                  x1+radius, y1,
+                  x2-radius, y1,
+                  x2-radius, y1,
+                  x2, y1,
+                  x2, y1+radius,
+                  x2, y1+radius,
+                  x2, y2-radius,
+                  x2, y2-radius,
+                  x2, y2,
+                  x2-radius, y2,
+                  x2-radius, y2,
+                  x1+radius, y2,
+                  x1+radius, y2,
+                  x1, y2,
+                  x1, y2-radius,
+                  x1, y2-radius,
+                  x1, y1+radius,
+                  x1, y1+radius,
+                  x1, y1]
+
+        return s.create_polygon(points, **kwargs, smooth=True)
