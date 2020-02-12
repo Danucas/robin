@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-python espectrum analizer
+RObin Spectrum ANalizer -- ROSAN -- module
 
 """
 
@@ -10,6 +10,15 @@ from sound_reader import AudioFile
 import sounddevice as sd
 
 class Track:
+    """
+    Track object, contains track widgets and tools
+    :filename: Is used for name the track
+    :nid: used to identify modify and track the object and it's behavior
+    :zone: contains a selected chunk of data
+    :canvas: the main container for the track view
+    :sel_file: run the file selection function
+    :play: play the complete track data
+    """
     instance = 0
     def __init__(self, root, filename=None):
         Track.instance += 1
@@ -72,7 +81,18 @@ class Track:
                             lambda e: root.selectZoneEnd(e, False, self.nid))
 
 class Sample:
+    """
+    Sample object
+    :data: The selected audio signal
+    :nid: used to track, modify and interact with the data and view
+    :window: the pop up window displayed
+    :canvas: the main container for the sample view handles the drawing
+    :play: plays the sample audio data
+    """
     def __init__(self, root, data, nid):
+        """
+        Inits the attributes, view and listeners
+        """
         self.data = data
         self.nid = nid
         self.window = tk.Toplevel(root.root)
@@ -100,16 +120,25 @@ class Sample:
         self.draw_sample()
 
     def on_close(self):
+        """
+        Removes the sample instances and view
+        """
         print("deleting", self.nid, "sample")
         self.window.destroy()
         del self
 
     def play_sound(self, evn):
+        """
+        Plays the sample chunk of data
+        """
         line = [None]
         line[0] = self.canvas.create_line(2, 1, 2, 120,
                                           fill="#3debe5",
                                           width=2)
         def draw_time_lapse():
+            """
+            Draws the time lapsing line
+            """
             init = 0
             end = int(len(self.data))
             width = 800
@@ -129,11 +158,12 @@ class Sample:
                 init += chunk
             sd.stop()
         draw_time_lapse()
-
-
-        sd.play(self.data, 44100, )
+        sd.play(self.data, 44100)
 
     def draw_sample(self):
+        """
+        Draws the spectrogram for the sample data
+        """
         width = len(self.data)
         col = "#4287f5"
         chunk = width
@@ -142,6 +172,7 @@ class Sample:
         x = 1
         pos = 0
         last = 60
+
         self.canvas.delete("all")
         while pos < chunk:
             y = float(self.data[pos]) + 0.5
@@ -154,7 +185,13 @@ class Sample:
 
 
 class Window:
+    """
+    The main view, holds the tracks and the main tools
+    """
     def __init__(self):
+        """
+        Inits the windows attributes instances and views
+        """
         self.root = tk.Tk()
         self.root.geometry("1280x150")
         self.root.configure(background="black")
@@ -168,13 +205,17 @@ class Window:
         self.au_d = [None, None]
         self.tracks = [None]
         self.tracks[0] = Track(self)
-        #self.tracks.append(Track(self))
-        #self.tracks.append(Track(self))
 
     def add_track(self):
+        """
+        Adds a new track to the main window
+        """
         self.tracks.append(Track(self))
 
     def selectZoneStart(self, ev, nid):
+        """
+        Set the start point for the sample selection
+        """
         if self.tracks[nid].zone != None:
             self.tracks[nid].canvas.delete(self.tracks[nid].zone)
         print(ev, ev.x, ev.y)
@@ -183,11 +224,13 @@ class Window:
                                                         fill="#2453a3",
                                                         stipple="gray12")
         self.selecting = True
-        #self.zones[0] = self.canvas[0].create_rectangle()
-
 
 
     def selectZoneEnd(self, ev, state, nid):
+        """
+        Resizes the selection
+        and create the new sample when press out the click button
+        """
         if state == True and self.selecting == True:
             last = self.tracks[nid].canvas.coords(self.tracks[nid].zone)
             x = last[0]
@@ -196,25 +239,37 @@ class Window:
             self.selecting = False
             x = self.tracks[nid].canvas.coords(self.tracks[nid].zone)[0]
             width = len(self.au_d[nid].data)
+            #Scaling to view size
             x1 = int((width * x) / 1280)
             x2 = int((width * ev.x) / 1280)
             self.sample = AudioFile("samps/sample.wav")
             self.sample.data = self.au_d[nid].data[x1:x2]
             self.set_sample(self.sample.data, nid)
-            #self.draw_spectrum(self.sample.data, nid)
             print(x, ev.x)
         pass
 
     def set_sample(self, data, nid):
+        """
+        Set the sample view and instance
+        """
         self.sample = Sample(self, data, nid)
 
     def play_file(self, event, c):
-
+        """
+        Plays the track file
+        """
         if self.au_d[c] != None:
             self.au_d[c].canvas = self.tracks[c].canvas
             self.au_d[c].play()
 
     def open_file(self, event, c):
+        """
+        open a file and save data in an AudioFile object
+        prints a list of files in recs/ folder
+        wait for user input
+        checks if file exists
+        and call draw_spectrum
+        """
         print("\033[34mFiles: \x1b[38;5;202m")
         files = os.listdir("./recs")
         for i in range(0, len(files), 3):
@@ -238,6 +293,12 @@ class Window:
             self.open_file(event, c)
 
     def draw_spectrum(self, sound, c, ini=0, end=None):
+        """
+        Iterates the full data by steps given by chunk of data
+        divided by window size
+        get each value and scale each one to the track window height
+        draws a line from the last to the actual
+        """
         if end == None:
             end = len(sound)
         col = "#a834eb" if c == 0 else "#f2a618"
@@ -259,26 +320,14 @@ class Window:
         return ini, ini + chunk
 
     def round_rectangle(self, x1, y1, x2, y2, s, radius=25, **kwargs):
-
-        points = [x1+radius, y1,
-                  x1+radius, y1,
-                  x2-radius, y1,
-                  x2-radius, y1,
-                  x2, y1,
-                  x2, y1+radius,
-                  x2, y1+radius,
-                  x2, y2-radius,
-                  x2, y2-radius,
-                  x2, y2,
-                  x2-radius, y2,
-                  x2-radius, y2,
-                  x1+radius, y2,
-                  x1+radius, y2,
-                  x1, y2,
-                  x1, y2-radius,
-                  x1, y2-radius,
-                  x1, y1+radius,
-                  x1, y1+radius,
-                  x1, y1]
-
+        """
+        creates a rounded rectangle shape
+        used for buttons and tools
+        """
+        points = [x1+radius, y1, x1+radius, y1, x2-radius, y1, x2-radius,
+                  y1, x2, y1, x2, y1+radius, x2, y1+radius, x2, y2-radius,
+                  x2, y2-radius, x2, y2, x2-radius, y2, x2-radius, y2,
+                  x1+radius, y2, x1+radius, y2,
+                  x1, y2, x1, y2-radius, x1, y2-radius, x1, y1+radius,
+                  x1, y1+radius, x1, y1]
         return s.create_polygon(points, **kwargs, smooth=True)

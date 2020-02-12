@@ -1,12 +1,8 @@
 #!/usr/bin/python3
 """
-run graphic analisis
+Run Rosan interface
 """
 
-from spectrum_analyser import Window
-from sound_reader import AudioFile
-
-
+from win_rosan import Window
 win = Window()
-
 win.root.mainloop()
