@@ -130,9 +130,6 @@ class Sample:
             sd.stop()
         draw_time_lapse()
 
-
-        sd.play(self.data, 44100, )
-
     def draw_sample(self):
         width = len(self.data)
         col = "#4287f5"
