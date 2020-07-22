@@ -73,7 +73,7 @@ Reads the .wav sound files, and store the raw bytes as an attribute for Audio ob
 Extras (Test Features)
 ----------------------
 
-This feature is creation state, an updated documentation about this feature will be release with the working version.
+This feature is at creation state, an updated documentation about this feature will be release with the working version.
 
 #### Requirement
 
