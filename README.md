@@ -74,7 +74,7 @@ Extras (Test Features)
 ----------------------
 
 This feature is at creation state, an updated documentation about this feature will be release with the working version.
-You can also try to run ```$ ./kivy```
+You can also try to run ```$ ./kivy.sh```
 
 #### Requirement
 
