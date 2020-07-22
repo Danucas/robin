@@ -16,7 +16,7 @@ Screenshots
 
 Rosan
 
-![](/images/schedule_demo.png)
+![](/images/sample.png)
 
 
 Dependencies
@@ -74,6 +74,7 @@ Extras (Test Features)
 ----------------------
 
 This feature is at creation state, an updated documentation about this feature will be release with the working version.
+You can also try to run ```$ ./kivy```
 
 #### Requirement
 
