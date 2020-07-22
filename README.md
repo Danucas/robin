@@ -107,7 +107,7 @@ Authors
 -------
 
 * Daniel Rodriguez 
-	- Gmail[dnart.tech@gmail.com](dnart.tech@gmail.com)
+	- Gmail [dnart.tech@gmail.com](dnart.tech@gmail.com)
 	- Twitter [@Danucas1](https://twitter.com/Danucas1)
 	- Linkedin [daniel-rodriguez-castillo](https://www.linkedin.com/in/daniel-rodriguez-castillo/)
 
