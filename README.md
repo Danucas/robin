@@ -1,39 +1,82 @@
-# Robin helper
-## Rosan
-Rosan is the integrated tool for spectrum analisis
-It performs graphical signal for Time and Frequency domains
+Robin
+-----
+A sound recognition system intended to provide emotional health  analisys, and suggest treatment options.
 
-## Installation
-You will need certain python modules
-make sure you have pip for python3 and run:
-> ./install_modules.sh
+Motivation
+----------
+To bring better support to health care workers, helping them to be more effective with their practice, and to keep in the research of emotional analisys through the spoken communication.
 
 
-## Usage
+Rosan
+-----
+Stands by RObin Spectrum ANalizer, is the integrated tool for spectrum analisis, it performs graphical signal drawing for Time and Frequency domains
 
-Open rosan:
+Screenshots
+-----------
 
-> ./rosan
+Rosan
 
-you will see two tracks
+![](/images/schedule_demo.png)
 
-press the "open file" button and look at the terminal
 
->Files:
->cat_2.wav
->
->col_2.wav
->
->cat.wav
->
->wis_2.wav
->
->schedule.wav
->
->tmp.wav
->
->claping.wav
->
->Choose a file: schedule
+Dependencies
+------------
 
-type the file name excluding the .wav extension
+1. Python ^3.6
+	* librosa
+	* tk
+	* sounddevice
+	* soundfile
+	* wave
+
+2. Ubuntu 18.04 (OS)
+	* ffmpeg
+	* libportaudio2
+	* libasound-dev
+
+Installation
+------------
+
+Run the script
+
+```
+$ ./install_modules.sh
+```
+
+Usage
+-----
+
+To run Rosan, be sure of having installed all dependencies
+
+```
+$ ./rosan
+```
+click to 'open file'
+
+and type one of the files in the list without the .wav extension, all audio files are stored in [/recs](/recs) directory,
+you can add your own files to analyze.
+
+Architecture
+------------
+
+Rosan is the entry point, it joins two cores:
+
+- [spectrum_analyser.py](spectrum_analyser.py):
+
+[docs](GRAPHICS.md)
+
+Encapsulates the render functions for the Window, Track and Sample elements
+
+- [sound_reader.py](sound_reader.py)
+
+[docs](AUDIO.md)
+
+Reads the .wav sound files, and store the raw bytes as an attribute for Audio object
+
+Authors
+-------
+
+* Daniel Rodriguez [gmail](dnart.tech@gmail.com)
+
+	Software engineer from Holberton School
+
