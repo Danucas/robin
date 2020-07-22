@@ -106,6 +106,7 @@ commenting about your experience with emotional health, we can build a community
 Authors
 -------
 
-* Daniel Rodriguez [gmail](dnart.tech@gmail.com)
+* Daniel Rodriguez [gmail](dnart.tech@gmail.com) Twitter [@Danucas1](https://twitter.com/Danucas1) [Linkedin](https://www.linkedin.com/in/daniel-rodriguez-castillo/)
 
-	Software engineer from Holberton School
+	Software engineer from Holberton School interested in visual programming, signal processing, data analisys,
+	graphics, sound and a lot of fields.
