@@ -59,19 +59,48 @@ you can add your own files to analyze.
 Architecture
 ------------
 
-Rosan is the entry point, it joins two cores:
+Rosan is the entry point, it joins two cores [docs](GRAPHICS.md):
 
 - [spectrum_analyser.py](spectrum_analyser.py):
 
-[docs](GRAPHICS.md)
-
-Encapsulates the render functions for the Window, Track and Sample elements
+Encapsulates the render functions for the Window, Track and Sample elements [docs](AUDIO.md):
 
 - [sound_reader.py](sound_reader.py)
 
-[docs](AUDIO.md)
-
 Reads the .wav sound files, and store the raw bytes as an attribute for Audio object
+
+
+Extras (Test Features)
+----------------------
+
+This feature is creation state, an updated documentation about this feature will be release with the working version.
+
+#### Requirement
+
+Install buildozer check the docs at [kivy](https://kivy.org/doc/stable/guide/packaging-android.html)
+
+```
+#!/usr/bin/env bash
+
+# Install buildozer
+git clone https://github.com/kivy/buildozer.git
+cd buildozer
+sudo python setup.py install
+```
+
+To record the needed data, a kivy test AndroidApp has been builded, using the [buildozer.spec](buildozer.spec) file.
+
+Plug your Android device and run:
+
+```
+$ buildozer android debug deploy run
+```
+
+Contribute
+----------
+
+To add new features just fork this repo and ask for a PR, also please send me an email 
+commenting about your experience with emotional health, we can build a community and bring great solutions for this.
 
 Authors
 -------
@@ -79,4 +108,3 @@ Authors
 * Daniel Rodriguez [gmail](dnart.tech@gmail.com)
 
 	Software engineer from Holberton School
-
