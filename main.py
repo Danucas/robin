@@ -133,6 +133,5 @@ class AudioTool(BoxLayout):
                     self.display_label.text = '0' + ':' + str(self.duration)
                     self.duration -= 1
 
-
 if __name__ == '__main__':
     TestApp().run()
