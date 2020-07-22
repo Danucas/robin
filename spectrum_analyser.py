@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 """
-python espectrum analizer
-
+Rosan espectrum Analyser
 """
 
 import tkinter as tk
