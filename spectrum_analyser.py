@@ -10,15 +10,23 @@ from sound_reader import AudioFile
 import sounddevice as sd
 
 class Track:
+    """
+    Attach a new Track to the window root
+    set dimensions, and add the listeners for
+    the region selection feature
+    """
     instance = 0
     def __init__(self, root, filename=None):
+        """
+        Sets the filename, the canvas containers according to the
+        screen info
+        """
         Track.instance += 1
         if filename == None:
             filename = "Track-" + str(Track.instance)
         self.filename = filename
         self.nid = Track.instance - 1
         self.zone = None
-        #open file track1
         root.root.geometry("1280x{}".format(150 * Track.instance))
         self.canvas = tk.Canvas(
             root.root,
@@ -27,7 +35,7 @@ class Track:
             bg="black", bd=0, relief="ridge",
             highlightthickness=0)
         self.canvas.place(x=0, y=(self.nid * 150))
-        #open file track1
+        # open file track1
         self.sel_file = tk.Canvas(
             self.canvas,
             width=(90),
@@ -46,7 +54,7 @@ class Track:
         self.sel_file.bind(
             "<Button-1>", lambda e: root.open_file(e, self.nid))
         self.sel_file.place(x=0, y=120)
-        #play button
+        # play button
         self.play_b = tk.Canvas(self.canvas,
             width=(45),
             height=(30),
@@ -62,21 +70,34 @@ class Track:
         root.round_rectangle(3, 3, 27, 27,
                              self.play_b,
                              radius=20, fill="#32a852")
+        # Play the track
         self.play_b.bind("<Button-1>", lambda e: root.play_file(e, self.nid))
         self.play_b.create_text(20, 15,
                                   text='>',
                                   anchor='e', fill="white")
         self.play_b.place(x=90, y=120)
+        # Start selecting a region
         self.canvas.bind(
             "<Button-1>", lambda e: root.selectZoneStart(e, self.nid))
+        # Adjust the selected region
         self.canvas.bind(
             "<Motion>", lambda e: root.selectZoneEnd(e, True, self.nid))
+        # Release the click an extract the region
         self.canvas.bind(
             "<ButtonRelease-1>", lambda e: root.selectZoneEnd(
                 e, False, self.nid))
 
 class Sample:
+    """
+    Creates an external window for the sample
+    to make it esy to close and remove the sample
+    """
     def __init__(self, root, data, nid):
+        """
+        Initializes with the signal data
+        bind the close and play buttons and call
+        to draw_sample to display the signal
+        """
         self.data = data
         self.nid = nid
         self.window = tk.Toplevel(root.root)
@@ -107,17 +128,27 @@ class Sample:
         self.draw_sample()
 
     def on_close(self):
+        """
+        Detects the close button click event
+        """
         print("deleting", self.nid, "sample")
         self.window.destroy()
         del self
 
     def play_sound(self, evn):
+        """
+        Play the bytes stored in self.data
+        and draws a process line until the end
+        """
         line = [None]
         line[0] = self.canvas.create_line(
             2, 1, 2, 120,
             fill="#3debe5",
             width=2)
         def draw_time_lapse():
+            """
+            Draw the process line
+            """
             init = 0
             end = int(len(self.data))
             width = 800
@@ -139,6 +170,9 @@ class Sample:
         draw_time_lapse()
 
     def draw_sample(self):
+        """
+        Draw the signal in the Sample canvas
+        """
         width = len(self.data)
         col = "#4287f5"
         chunk = width
@@ -159,7 +193,14 @@ class Sample:
 
 
 class Window:
+    """
+    Container for Rosan Tool
+    """
     def __init__(self):
+        """
+        Initializes a tk window for Rosan
+        and set the menu event listeners
+        """
         self.root = tk.Tk()
         self.root.geometry("1280x150")
         self.root.configure(background="black")
@@ -175,19 +216,30 @@ class Window:
         self.tracks[0] = Track(self)
 
     def add_track(self):
+        """
+        Adds a new track to the window
+        """
         self.tracks.append(Track(self))
 
     def selectZoneStart(self, ev, nid):
+        """
+        Start selecting the region to sample
+        """
         if self.tracks[nid].zone != None:
             self.tracks[nid].canvas.delete(self.tracks[nid].zone)
         print(ev, ev.x, ev.y)
-        self.tracks[nid].zone = self.tracks[nid].canvas.create_rectangle(ev.x, 1,
-                                                        ev.x, 120,
-                                                        fill="#2453a3",
-                                                        stipple="gray12")
+        self.tracks[nid].zone = self.tracks[nid].canvas.create_rectangle(
+            ev.x, 1,
+            ev.x, 120,
+            fill="#2453a3",
+            stipple="gray12")
         self.selecting = True
 
     def selectZoneEnd(self, ev, state, nid):
+        """
+        Stop selecting the region to sample
+        and extract the data for the Sample new instance
+        """
         if state == True and self.selecting == True:
             last = self.tracks[nid].canvas.coords(self.tracks[nid].zone)
             x = last[0]
@@ -205,15 +257,23 @@ class Window:
         pass
 
     def set_sample(self, data, nid):
+        """
+        Set the data to the new Sample object
+        """
         self.sample = Sample(self, data, nid)
 
     def play_file(self, event, c):
-
+        """
+        Play the signal of a given Track
+        """
         if self.au_d[c] != None:
             self.au_d[c].canvas = self.tracks[c].canvas
             self.au_d[c].play()
 
     def open_file(self, event, c):
+        """
+        Open a new Audio file an draw the signal
+        """
         print("\033[34mFiles: \x1b[38;5;202m")
         files = os.listdir("./recs")
         for i in range(0, len(files), 3):
@@ -236,6 +296,9 @@ class Window:
             self.open_file(event, c)
 
     def draw_spectrum(self, sound, c, ini=0, end=None):
+        """
+        Draw the complete signal spectrum in the Track
+        """
         if end == None:
             end = len(sound)
         col = "#a834eb" if c == 0 else "#f2a618"
@@ -256,6 +319,9 @@ class Window:
         return ini, ini + chunk
 
     def round_rectangle(self, x1, y1, x2, y2, s, radius=25, **kwargs):
+        """
+        Customized Polygon to create rounded views in tkinter
+        """
         points = [
             x1+radius, y1,
             x1+radius, y1,
@@ -278,5 +344,4 @@ class Window:
             x1, y1+radius,
             x1, y1
         ]
-
         return s.create_polygon(points, **kwargs, smooth=True)
