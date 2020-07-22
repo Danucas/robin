@@ -112,5 +112,9 @@ Authors
 	- Linkedin [daniel-rodriguez-castillo](https://www.linkedin.com/in/daniel-rodriguez-castillo/)
 
 	Software engineer from Holberton School interested in visual programming, signal processing, data analisys,
-	graphics, sound and a lot of fields.
+	graphics, sound and a lot of other fields.
+
+Portfolio Project
+-----------------
+[Data in motion](https://github.com/alejolo311/DataInMotion)
 
