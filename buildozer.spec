@@ -2,7 +2,7 @@
 
 # (str) Title of your application
 title = Robin
-
+# Adding package.name
 # (str) Package name
 package.name = robin
 
@@ -304,8 +304,6 @@ warn_on_root = 1
 #data/audio/*.wav
 #data/images/original/*
 #
-
-
 #    -----------------------------------------------------------------------------
 #    Profiles
 #
