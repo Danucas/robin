@@ -105,7 +105,8 @@ commenting about your experience with emotional health, we can build a community
 
 Authors
 -------
-
+<a href="https://sourcerer.io/danucas"><img src="https://avatars0.githubusercontent.com/u/45695858?v=4" height="50px" width="50px" alt=""/></a>
+<a href="https://sourcerer.io/danucas"><img src="https://img.shields.io/badge/Python-783%20commits-orange.svg" alt=""></a>
 * Daniel Rodriguez 
 	- Gmail [dnart.tech@gmail.com](dnart.tech@gmail.com)
 	- Twitter [@Danucas1](https://twitter.com/Danucas1)
@@ -118,5 +119,4 @@ Portfolio Project
 -----------------
 [Data in motion](https://github.com/alejolo311/DataInMotion)
 
-<a href="https://sourcerer.io/danucas"><img src="https://avatars0.githubusercontent.com/u/45695858?v=4" height="50px" width="50px" alt=""/></a>
 
